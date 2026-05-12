@@ -1,0 +1,58 @@
+# 🚀 Copy-Paste Commands for Deployment
+
+## Step 1: Initialize Git and Commit
+# Run these commands in D:\Grahini\ folder
+
+git init
+git add .
+git commit -m "Initial commit - Grahini Mart ecommerce website"
+
+## Step 2: Create Repository on GitHub
+# Go to: https://github.com/new
+# Repository name: grahini-mart
+# Make it Public
+# Don't initialize with README
+# Click "Create repository"
+
+## Step 3: Link and Push to GitHub
+# Replace with your actual GitHub username if different
+
+git remote add origin https://github.com/vipul0409/grahini-mart.git
+git branch -M main
+git push -u origin main
+
+## Step 4: Deploy on Vercel
+# Go to: https://vercel.com/signup
+# Sign up with GitHub
+# Then go to: https://vercel.com/new
+# Import your repository: vipul0409/grahini-mart
+# Add environment variables (see below)
+# Click Deploy
+
+## Environment Variables for Vercel
+# Copy these one by one into Vercel:
+
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyDummyKeyForDevelopment123456789
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=grahini-mart-dummy.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=grahini-mart-dummy
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=grahini-mart-dummy.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_dummy123456789
+RAZORPAY_KEY_SECRET=dummy_secret_key_123456789
+NEXT_PUBLIC_APP_URL=https://grahini-mart.vercel.app
+NEXT_PUBLIC_WHATSAPP_NUMBER=918989475895
+
+## Done! 🎉
+# Your site will be live at:
+# https://grahini-mart.vercel.app
+# or
+# https://grahini-mart-vipul0409.vercel.app
+
+## To Update Later:
+
+git add .
+git commit -m "Updated content"
+git push
+
+# Vercel automatically redeploys!
