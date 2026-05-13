@@ -22,17 +22,33 @@ import { Category } from '@/types/category'
 
 export default function CategoriesPage() {
   const router = useRouter()
-  const { categories, deleteCategory, updateCategory } = useAdminStore()
+  const { categories, loadCategories, deleteCategory, updateCategory } = useAdminStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Check authentication
     const isAuth = localStorage.getItem('adminAuth')
     if (!isAuth) {
       router.push('/admin')
+      return
     }
+
+    // Load categories from Firebase
+    const loadData = async () => {
+      try {
+        await loadCategories()
+      } catch (error) {
+        console.error('Error loading categories:', error)
+        toast.error('Failed to load categories')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
   }, [])
 
   const handleDelete = (id: string) => {
@@ -91,7 +107,15 @@ export default function CategoriesPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {loading ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <p className="mt-4 text-gray-600">Loading categories...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div
@@ -256,6 +280,7 @@ export default function CategoriesPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* Add/Edit Category Modal */}
       {showAddModal && (

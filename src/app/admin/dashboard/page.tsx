@@ -18,12 +18,11 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import ProductForm from '@/components/admin/ProductForm'
 import { useAdminStore } from '@/store/adminStore'
-import { sampleProducts } from '@/lib/sampleData'
 import { Product } from '@/types'
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const { products, setProducts, deleteProduct } = useAdminStore()
+  const { products: adminProducts, deleteProduct, loadProducts, loadCategories } = useAdminStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -37,10 +36,9 @@ export default function AdminDashboard() {
       return
     }
 
-    // Load sample products if empty
-    if (products.length === 0) {
-      setProducts(sampleProducts)
-    }
+    // Load products and categories from Firebase
+    loadProducts()
+    loadCategories()
   }, [])
 
   const handleLogout = () => {
@@ -61,7 +59,7 @@ export default function AdminDashboard() {
     setShowAddModal(true)
   }
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = adminProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = filterCategory === 'all' || product.category === filterCategory
     return matchesSearch && matchesCategory
@@ -126,7 +124,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{products.length}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{adminProducts.length}</p>
               </div>
               <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                 <Package className="w-6 h-6 text-primary-600" />
@@ -144,7 +142,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm text-gray-600">Pulses</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {products.filter(p => p.category === 'pulses').length}
+                  {adminProducts.filter(p => p.category === 'pulses').length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -163,7 +161,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm text-gray-600">Dry Fruits</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {products.filter(p => p.category === 'dry-fruits').length}
+                  {adminProducts.filter(p => p.category === 'dry-fruits').length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -182,7 +180,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm text-gray-600">Masala</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {products.filter(p => p.category === 'masala').length}
+                  {adminProducts.filter(p => p.category === 'masala').length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">

@@ -62,8 +62,8 @@ export default function CategoryForm({ category, onClose }: CategoryFormProps) {
       return
     }
 
-    const categoryData: Category = {
-      id: category?.id || `cat-${Date.now()}`,
+    // Don't include 'id' in the data - Firestore will generate it
+    const categoryData: Omit<Category, 'id'> = {
       name: formData.name,
       slug: formData.slug,
       description: formData.description,

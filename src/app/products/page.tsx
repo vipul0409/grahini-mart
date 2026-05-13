@@ -7,21 +7,40 @@ import ProductGrid from '@/components/products/ProductGrid'
 import ProductFilters from '@/components/products/ProductFilters'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
-import { sampleProducts } from '@/lib/sampleData'
+import { getAllProducts } from '@/lib/productService'
 import { Product } from '@/types'
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>(sampleProducts)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load all products from Firebase on mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      setIsLoading(true)
+      try {
+        const loadedProducts = await getAllProducts()
+        setAllProducts(loadedProducts)
+        setProducts(loadedProducts)
+      } catch (error) {
+        console.error('Error loading products:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadProducts()
+  }, [])
 
   const handleFilterChange = (filters: any) => {
     setIsLoading(true)
     
     // Simulate filtering
     setTimeout(() => {
-      let filtered = [...sampleProducts]
+      let filtered = [...allProducts]
 
       // Filter by categories
       if (filters.categories?.length > 0) {

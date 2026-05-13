@@ -20,13 +20,16 @@ import toast from 'react-hot-toast'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { generateInvoicePDF } from '@/lib/pdfGenerator'
+import { getAllOrders, updateOrderStatus } from '@/lib/db/orders'
+import type { Order } from '@/lib/db/orders'
 
 export default function AdminOrdersPage() {
   const router = useRouter()
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'completed'>('all')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Check authentication
@@ -36,38 +39,50 @@ export default function AdminOrdersPage() {
       return
     }
 
-    // Load orders from localStorage
+    // Load orders from Firebase
     loadOrders()
   }, [])
 
-  const loadOrders = () => {
-    const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-    // Sort by date (newest first)
-    const sortedOrders = storedOrders.sort((a: any, b: any) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    setOrders(sortedOrders)
+  const loadOrders = async () => {
+    setLoading(true)
+    try {
+      const fetchedOrders = await getAllOrders()
+      setOrders(fetchedOrders)
+    } catch (error) {
+      console.error('Error loading orders:', error)
+      toast.error('Failed to load orders')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    const updatedOrders = orders.map(order => 
-      order.orderId === orderId 
-        ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
-        : order
-    )
-    
-    // Save to localStorage
-    localStorage.setItem('orders', JSON.stringify(updatedOrders))
-    
-    // Update state
-    setOrders(updatedOrders)
-    
-    // Show success message
-    toast.success(`Order ${orderId} marked as ${newStatus}`)
-    
-    // Close modal if open
-    if (selectedOrder?.orderId === orderId) {
-      setSelectedOrder({ ...selectedOrder, status: newStatus })
+  const updateStatus = async (orderId: string, newStatus: 'pending' | 'completed' | 'cancelled') => {
+    try {
+      // Find the order by orderId field (not the document ID)
+      const order = orders.find(o => o.orderId === orderId)
+      if (!order || !order.id) {
+        toast.error('Order not found')
+        return
+      }
+
+      await updateOrderStatus(order.id, newStatus)
+      
+      // Update local state
+      setOrders(orders.map(o => 
+        o.orderId === orderId 
+          ? { ...o, status: newStatus }
+          : o
+      ))
+      
+      toast.success(`Order ${orderId} marked as ${newStatus}`)
+      
+      // Close modal if open
+      if (selectedOrder?.orderId === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus })
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error)
+      toast.error('Failed to update order status')
     }
   }
 
@@ -336,7 +351,7 @@ export default function AdminOrdersPage() {
                         <Button
                           variant="primary"
                           size="sm"
-                          onClick={() => updateOrderStatus(order.orderId, 'completed')}
+                          onClick={() => updateStatus(order.orderId, 'completed')}
                           className="flex-1 sm:flex-none flex items-center justify-center gap-2"
                         >
                           <CheckCircle className="w-4 h-4" />
@@ -465,7 +480,7 @@ export default function AdminOrdersPage() {
                     <Button
                       variant="primary"
                       onClick={() => {
-                        updateOrderStatus(selectedOrder.orderId, 'completed')
+                        updateStatus(selectedOrder.orderId, 'completed')
                       }}
                       className="flex-1 flex items-center justify-center gap-2"
                     >
@@ -476,7 +491,7 @@ export default function AdminOrdersPage() {
                       variant="outline"
                       onClick={() => {
                         if (confirm('Are you sure you want to cancel this order?')) {
-                          updateOrderStatus(selectedOrder.orderId, 'cancelled')
+                          updateStatus(selectedOrder.orderId, 'cancelled')
                         }
                       }}
                       className="flex-1 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50"

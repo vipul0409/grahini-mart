@@ -22,7 +22,8 @@ import { SITE_NAME } from '@/lib/constants'
 import { generateInvoicePDF } from '@/lib/pdfGenerator'
 import { sendOrderEmailToAdmin, copyOrderEmailToClipboard } from '@/lib/emailService'
 import { validateOrderPrices, recalculateOrderTotal } from '@/lib/security'
-import { sampleProducts } from '@/lib/sampleData'
+import { getAllProducts } from '@/lib/productService'
+import { addOrder } from '@/lib/db/orders'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -83,7 +84,8 @@ export default function CheckoutPage() {
     }
 
     // SECURITY: Validate prices to prevent manipulation
-    const pricesValid = validateOrderPrices(items, sampleProducts)
+    const allProducts = await getAllProducts()
+    const pricesValid = validateOrderPrices(items, allProducts)
     if (!pricesValid) {
       toast.error('Price validation failed. Please refresh and try again.')
       setLoading(false)
@@ -96,7 +98,7 @@ export default function CheckoutPage() {
     }
 
     // SECURITY: Recalculate total from actual product prices
-    const validatedSubtotal = recalculateOrderTotal(items, sampleProducts)
+    const validatedSubtotal = recalculateOrderTotal(items, allProducts)
     const validatedDeliveryCharge = validatedSubtotal >= 500 ? 0 : 40
     const validatedTotal = validatedSubtotal + validatedDeliveryCharge
 
@@ -128,7 +130,7 @@ export default function CheckoutPage() {
       },
       items: items.map(item => {
         // Get actual product data to ensure correct prices
-        const product = sampleProducts.find(p => p.id === item.productId)
+        const product = allProducts.find(p => p.id === item.productId)
         const variant = product?.variants.find(v => v.id === item.variantId)
         
         return {
@@ -145,24 +147,16 @@ export default function CheckoutPage() {
       total: validatedTotal,
       paymentMethod: formData.paymentMethod,
       orderNotes: formData.orderNotes,
-      status: 'pending',
+      status: 'pending' as const, // Explicitly type as const
       createdAt: new Date().toISOString(),
       securityCheck: 'VALIDATED', // Mark as validated
     }
 
-    // Save order to localStorage (you can later send to backend/email)
+    // Save order to Firebase Firestore
     try {
-      // Get existing orders
-      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
-      
-      // Add new order
-      existingOrders.push(order)
-      
-      // Save back to localStorage
-      localStorage.setItem('orders', JSON.stringify(existingOrders))
-
-      // Log order details (you'll see this in browser console)
-      console.log('📦 NEW ORDER RECEIVED:', order)
+      // Save to Firebase
+      const firebaseOrderId = await addOrder(order)
+      console.log('✅ Order saved to Firebase with ID:', firebaseOrderId)
 
       // Generate and download PDF invoice
       generateInvoicePDF(order)

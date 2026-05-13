@@ -8,21 +8,34 @@ import Button from '@/components/ui/Button'
 import { SITE_NAME } from '@/lib/constants'
 import { generateInvoicePDF } from '@/lib/pdfGenerator'
 import toast from 'react-hot-toast'
+import { getAllOrders } from '@/lib/db/orders'
+import type { Order } from '@/lib/db/orders'
 
 function OrderSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const orderId = searchParams.get('orderId')
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (orderId) {
-      // Get order from localStorage
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]')
-      const foundOrder = orders.find((o: any) => o.orderId === orderId)
-      setOrder(foundOrder)
+      // Get order from Firebase
+      loadOrder(orderId)
     }
   }, [orderId])
+
+  const loadOrder = async (orderId: string) => {
+    try {
+      const orders = await getAllOrders()
+      const foundOrder = orders.find((o) => o.orderId === orderId)
+      setOrder(foundOrder || null)
+    } catch (error) {
+      console.error('Error loading order:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!order) {
     return (

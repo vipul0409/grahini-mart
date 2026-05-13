@@ -8,9 +8,9 @@ import toast from 'react-hot-toast'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
-// Admin credentials
-const ADMIN_USERNAME = 'Pranjal'
-const ADMIN_PASSWORD = 'Saksham@#2029#456789'
+// Admin credentials from environment variables
+const ADMIN_USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
 
 export default function AdminLoginPage() {
   const router = useRouter()

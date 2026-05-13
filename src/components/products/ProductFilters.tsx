@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, X } from 'lucide-react'
-import { CATEGORIES, WEIGHT_OPTIONS, SORT_OPTIONS } from '@/lib/constants'
+import { WEIGHT_OPTIONS, SORT_OPTIONS } from '@/lib/constants'
 import Button from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { Category } from '@/types/category'
+import { getActiveCategories } from '@/lib/db/categories'
 
 interface ProductFiltersProps {
   onFilterChange: (filters: any) => void
@@ -18,6 +20,7 @@ export default function ProductFilters({
   isMobile = false,
   onClose,
 }: ProductFiltersProps) {
+  const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedWeights, setSelectedWeights] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000])
@@ -28,6 +31,20 @@ export default function ProductFilters({
     'weight',
   ])
 
+  // Load categories from Firebase
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await getActiveCategories()
+        setCategories(cats)
+      } catch (error) {
+        console.error('Error loading categories:', error)
+      }
+    }
+
+    loadCategories()
+  }, [])
+
   const toggleSection = (section: string) => {
     setExpandedSections((prev) =>
       prev.includes(section)
@@ -36,11 +53,11 @@ export default function ProductFilters({
     )
   }
 
-  const handleCategoryToggle = (categoryId: string) => {
+  const handleCategoryToggle = (categorySlug: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
+      prev.includes(categorySlug)
+        ? prev.filter((slug) => slug !== categorySlug)
+        : [...prev, categorySlug]
     )
   }
 
@@ -151,12 +168,12 @@ export default function ProductFilters({
         {/* Categories */}
         <FilterSection title="Categories" id="category">
           <div className="space-y-2">
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <label key={category.id} className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={selectedCategories.includes(category.id)}
-                  onChange={() => handleCategoryToggle(category.id)}
+                  checked={selectedCategories.includes(category.slug)}
+                  onChange={() => handleCategoryToggle(category.slug)}
                   className="w-4 h-4 text-primary-500 rounded focus:ring-primary-500"
                 />
                 <span className="ml-3 text-sm text-gray-700">
