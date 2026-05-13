@@ -62,7 +62,13 @@ export const initializeDefaultCategories = async (): Promise<void> => {
 
     // Add default categories
     for (const category of DEFAULT_CATEGORIES) {
-      await addCategory(category)
+      // Add createdAt and updatedAt for the addCategory function
+      const categoryWithDates = {
+        ...category,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      await addCategory(categoryWithDates)
     }
 
     console.log('✅ Default categories initialized successfully!')

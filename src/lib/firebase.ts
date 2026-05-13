@@ -13,10 +13,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Check if using dummy credentials
-const useMockMode = isDummyMode()
+// Check if using dummy credentials or if we're in build time
+const useMockMode = isDummyMode() || typeof window === 'undefined'
 
-if (useMockMode) {
+if (useMockMode && typeof window !== 'undefined') {
   console.log('🔧 Running in MOCK MODE with dummy Firebase credentials')
   console.log('📝 To use real Firebase, update credentials in .env.local')
 }
