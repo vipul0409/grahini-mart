@@ -3,6 +3,10 @@ import { persist } from 'zustand/middleware'
 import { Cart, CartItem, Product, ProductVariant } from '@/types'
 import { getDeliveryCharge } from '@/lib/utils'
 
+// SECURITY NOTE: Prices are validated on checkout submission
+// Any manipulation of cart prices will be detected and rejected
+// The checkout process recalculates all prices from the source product data
+
 interface CartStore extends Cart {
   addItem: (product: Product, variant: ProductVariant, quantity?: number) => void
   removeItem: (productId: string, variantId: string) => void

@@ -4,8 +4,8 @@ import { Toaster } from 'react-hot-toast'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import MobileNav from '@/components/layout/MobileNav'
-import AuthModal from '@/components/auth/AuthModal'
 import CartDrawer from '@/components/cart/CartDrawer'
+import SecurityProvider from '@/components/SecurityProvider'
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/lib/constants'
 import './globals.css'
 
@@ -78,11 +78,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body className="font-sans antialiased bg-gray-50">
+        <SecurityProvider />
         <Header />
         <main className="min-h-screen pb-20 lg:pb-0">{children}</main>
         <Footer />
         <MobileNav />
-        <AuthModal />
         <CartDrawer />
         <Toaster
           position="top-center"

@@ -6,23 +6,18 @@ import { motion } from 'framer-motion'
 import {
   Search,
   ShoppingCart,
-  User,
   Menu,
-  Heart,
   Phone,
 } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
-import { useUserStore } from '@/store/userStore'
 import { useUIStore } from '@/store/uiStore'
 import { SITE_NAME, WHATSAPP_NUMBER } from '@/lib/constants'
 import { getWhatsAppLink } from '@/lib/utils'
-import Button from '@/components/ui/Button'
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const cartItems = useCartStore((state) => state.items)
-  const user = useUserStore((state) => state.user)
-  const { toggleCart, toggleMobileMenu, toggleAuthModal } = useUIStore()
+  const { toggleCart, toggleMobileMenu } = useUIStore()
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
@@ -96,21 +91,6 @@ export default function Header() {
               <Search className="w-6 h-6" />
             </button>
 
-            {/* Wishlist */}
-            {user && (
-              <Link
-                href="/wishlist"
-                className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg relative"
-              >
-                <Heart className="w-6 h-6" />
-                {user.wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                    {user.wishlist.length}
-                  </span>
-                )}
-              </Link>
-            )}
-
             {/* Cart */}
             <button
               onClick={toggleCart}
@@ -127,25 +107,6 @@ export default function Header() {
                 </motion.span>
               )}
             </button>
-
-            {/* User */}
-            {user ? (
-              <Link
-                href="/account"
-                className="hidden md:flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg"
-              >
-                <User className="w-6 h-6" />
-                <span className="hidden lg:inline text-sm font-medium">
-                  {user.name}
-                </span>
-              </Link>
-            ) : (
-              <Link href="/auth">
-                <Button variant="primary" size="sm" className="hidden md:flex">
-                  Login
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
 

@@ -2,7 +2,6 @@ import HeroSlider from '@/components/home/HeroSlider'
 import CategorySection from '@/components/home/CategorySection'
 import FeaturedProducts from '@/components/home/FeaturedProducts'
 import WhyChooseUs from '@/components/home/WhyChooseUs'
-import Testimonials from '@/components/home/Testimonials'
 import { sampleProducts, sampleBanners } from '@/lib/sampleData'
 
 export default function HomePage() {
@@ -38,9 +37,6 @@ export default function HomePage() {
           subtitle="Most loved by our customers"
         />
       )}
-
-      {/* Testimonials */}
-      <Testimonials />
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
