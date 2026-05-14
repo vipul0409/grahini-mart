@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, X } from 'lucide-react'
@@ -16,7 +16,7 @@ interface ProductFiltersProps {
   onClose?: () => void
 }
 
-export default function ProductFilters({
+function ProductFiltersContent({
   onFilterChange,
   isMobile = false,
   onClose,
@@ -253,5 +253,15 @@ export default function ProductFilters({
         </Button>
       </div>
     </div>
+  )
+}
+
+
+// Wrapper with Suspense boundary
+export default function ProductFilters(props: ProductFiltersProps) {
+  return (
+    <Suspense fallback={<div className="p-4">Loading filters...</div>}>
+      <ProductFiltersContent {...props} />
+    </Suspense>
   )
 }

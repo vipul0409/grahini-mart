@@ -85,8 +85,12 @@ export default function CategoryForm({ category, onClose }: CategoryFormProps) {
 
     try {
       if (category) {
-        // Pass the old slug so products can be updated
-        await updateCategory(category.id, categoryData, category.slug)
+        // Import database function directly to pass old slug
+        const { updateCategory: updateCategoryDB } = await import('@/lib/db/categories')
+        await updateCategoryDB(category.id, categoryData, category.slug)
+        
+        // Update local store
+        updateCategory(category.id, categoryData)
         toast.success('Category updated successfully! Products also updated.')
       } else {
         await addCategory(categoryData)
