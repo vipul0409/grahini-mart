@@ -63,12 +63,23 @@ export const updateCategory = async (id: string, updates: Partial<Category>): Pr
  */
 export const deleteCategory = async (id: string): Promise<void> => {
   try {
+    console.log('🗑️ Attempting to delete category:', id)
     const categoryRef = doc(db, CATEGORIES_COLLECTION, id)
     await deleteDoc(categoryRef)
     console.log('✅ Category deleted:', id)
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error deleting category:', error)
-    throw new Error('Failed to delete category')
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    // Provide more specific error messages
+    if (error?.code === 'permission-denied') {
+      throw new Error('Permission denied. Please update Firestore security rules.')
+    } else if (error?.code === 'not-found') {
+      throw new Error('Category not found in database.')
+    } else {
+      throw new Error(`Failed to delete category: ${error?.message || 'Unknown error'}`)
+    }
   }
 }
 

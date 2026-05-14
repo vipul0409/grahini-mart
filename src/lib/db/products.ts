@@ -66,12 +66,23 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
  */
 export const deleteProduct = async (id: string): Promise<void> => {
   try {
+    console.log('🗑️ Attempting to delete product:', id)
     const productRef = doc(db, PRODUCTS_COLLECTION, id)
     await deleteDoc(productRef)
     console.log('✅ Product deleted:', id)
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error deleting product:', error)
-    throw new Error('Failed to delete product')
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    // Provide more specific error messages
+    if (error?.code === 'permission-denied') {
+      throw new Error('Permission denied. Please update Firestore security rules.')
+    } else if (error?.code === 'not-found') {
+      throw new Error('Product not found in database.')
+    } else {
+      throw new Error(`Failed to delete product: ${error?.message || 'Unknown error'}`)
+    }
   }
 }
 
