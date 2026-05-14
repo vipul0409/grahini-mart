@@ -36,14 +36,14 @@ export const generateOrderEmailHTML = (order: Order): string => {
       <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
         <div style="font-weight: 600; color: #111827;">${item.name}</div>
         <div style="font-size: 14px; color: #6b7280;">
-          ${item.selectedVariant.weight}${item.selectedVariant.unit} × ${item.quantity}
+          ${item.weight} × ${item.quantity}
         </div>
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">
-        ₹${item.selectedVariant.price} × ${item.quantity}
+        ₹${item.price} × ${item.quantity}
       </td>
       <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">
-        ₹${item.selectedVariant.price * item.quantity}
+        ₹${item.total}
       </td>
     </tr>
   `
@@ -132,16 +132,13 @@ export const generateOrderEmailHTML = (order: Order): string => {
                 <tr>
                   <td>
                     <p style="margin: 0 0 8px 0; color: #111827; font-weight: 600; font-size: 16px;">
-                      ${order.customerInfo.name}
+                      ${order.shippingAddress.name}
                     </p>
                     <p style="margin: 0 0 4px 0; color: #6b7280; font-size: 14px;">
-                      📞 ${order.customerInfo.phone}
-                    </p>
-                    <p style="margin: 0 0 4px 0; color: #6b7280; font-size: 14px;">
-                      📧 ${order.customerInfo.email}
+                      📞 ${order.shippingAddress.phone}
                     </p>
                     <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px; line-height: 1.5;">
-                      📍 ${order.customerInfo.address}, ${order.customerInfo.city}, ${order.customerInfo.state} - ${order.customerInfo.pincode}
+                      📍 ${order.shippingAddress.addressLine1}${order.shippingAddress.addressLine2 ? ', ' + order.shippingAddress.addressLine2 : ''}${order.shippingAddress.landmark ? ', ' + order.shippingAddress.landmark : ''}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}
                     </p>
                   </td>
                 </tr>
@@ -174,7 +171,7 @@ export const generateOrderEmailHTML = (order: Order): string => {
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Delivery Charges:</td>
                   <td style="padding: 8px 0; color: #111827; text-align: right;">
-                    ${order.deliveryCharges === 0 ? 'FREE' : `₹${order.deliveryCharges}`}
+                    ${order.deliveryCharge === 0 ? 'FREE' : `₹${order.deliveryCharge}`}
                   </td>
                 </tr>
                 ${
@@ -194,18 +191,6 @@ export const generateOrderEmailHTML = (order: Order): string => {
               </table>
 
               <!-- Delivery Info -->
-              ${
-                order.deliverySlot
-                  ? `
-              <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 24px; border-radius: 4px;">
-                <p style="margin: 0; font-size: 14px; color: #1e40af;">
-                  <strong>🚚 Preferred Delivery Slot:</strong> ${order.deliverySlot}
-                </p>
-              </div>
-              `
-                  : ''
-              }
-
               ${
                 order.notes
                   ? `
@@ -227,7 +212,7 @@ export const generateOrderEmailHTML = (order: Order): string => {
                        style="display: inline-block; background-color: #f97316; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 0 8px;">
                       View in Firebase
                     </a>
-                    <a href="tel:${order.customerInfo.phone}" 
+                    <a href="tel:${order.shippingAddress.phone}" 
                        style="display: inline-block; background-color: #10b981; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 0 8px;">
                       📞 Call Customer
                     </a>
@@ -265,7 +250,7 @@ export const generateOrderEmailText = (order: Order): string => {
   const items = order.items
     .map(
       (item) =>
-        `- ${item.name} (${item.selectedVariant.weight}${item.selectedVariant.unit}) × ${item.quantity} = ₹${item.selectedVariant.price * item.quantity}`
+        `- ${item.name} (${item.weight}) × ${item.quantity} = ₹${item.total}`
     )
     .join('\n')
 
@@ -278,21 +263,19 @@ Payment Method: ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online P
 Payment Status: ${order.paymentStatus}
 
 CUSTOMER INFORMATION:
-Name: ${order.customerInfo.name}
-Phone: ${order.customerInfo.phone}
-Email: ${order.customerInfo.email}
-Address: ${order.customerInfo.address}, ${order.customerInfo.city}, ${order.customerInfo.state} - ${order.customerInfo.pincode}
+Name: ${order.shippingAddress.name}
+Phone: ${order.shippingAddress.phone}
+Address: ${order.shippingAddress.addressLine1}${order.shippingAddress.addressLine2 ? ', ' + order.shippingAddress.addressLine2 : ''}${order.shippingAddress.landmark ? ', Landmark: ' + order.shippingAddress.landmark : ''}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}
 
 ORDER ITEMS:
 ${items}
 
 ORDER SUMMARY:
 Subtotal: ₹${order.subtotal}
-Delivery Charges: ${order.deliveryCharges === 0 ? 'FREE' : `₹${order.deliveryCharges}`}
+Delivery Charges: ${order.deliveryCharge === 0 ? 'FREE' : `₹${order.deliveryCharge}`}
 ${order.discount > 0 ? `Discount: -₹${order.discount}` : ''}
 Total Amount: ₹${order.total}
 
-${order.deliverySlot ? `Preferred Delivery Slot: ${order.deliverySlot}` : ''}
 ${order.notes ? `Customer Notes: ${order.notes}` : ''}
 
 View order in Firebase: https://console.firebase.google.com/project/grahini-mart/firestore/data/~2Forders~2F${order.id}
