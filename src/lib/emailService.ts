@@ -1,4 +1,5 @@
 import { EMAIL } from './constants'
+import { sendOrderNotificationEmail } from './email'
 
 export interface OrderEmailData {
   orderId: string
@@ -32,10 +33,78 @@ export interface OrderEmailData {
   createdAt: string
 }
 
-export const sendOrderEmailToAdmin = (orderData: OrderEmailData) => {
-  const subject = `New Order Received - ${orderData.orderId}`
-  
-  const body = `
+export const sendOrderEmailToAdmin = async (orderData: OrderEmailData) => {
+  try {
+    // Convert OrderEmailData to Order format for email template
+    const order = {
+      id: orderData.orderId,
+      customerInfo: {
+        name: orderData.customer.name,
+        phone: orderData.customer.phone,
+        email: orderData.customer.email || '',
+        address: orderData.deliveryAddress.address,
+        city: orderData.deliveryAddress.city,
+        state: orderData.deliveryAddress.state,
+        pincode: orderData.deliveryAddress.pincode,
+        landmark: orderData.deliveryAddress.landmark,
+      },
+      items: orderData.items.map(item => ({
+        id: '',
+        name: item.name,
+        slug: '',
+        category: '',
+        images: [],
+        selectedVariant: {
+          id: '',
+          weight: item.variant.weight,
+          unit: item.variant.unit,
+          price: item.variant.price,
+          mrp: item.variant.price,
+          discount: 0,
+          sku: '',
+          stock: 0,
+          isDefault: true,
+        },
+        quantity: item.quantity,
+      })),
+      subtotal: orderData.subtotal,
+      deliveryCharges: orderData.deliveryCharge,
+      discount: 0,
+      total: orderData.total,
+      paymentMethod: orderData.paymentMethod,
+      paymentStatus: orderData.paymentMethod === 'cod' ? 'pending' : 'paid',
+      status: 'pending',
+      notes: orderData.orderNotes,
+      deliverySlot: undefined,
+      createdAt: orderData.createdAt,
+      updatedAt: orderData.createdAt,
+    }
+
+    // Send email via API
+    await sendOrderNotificationEmail(order as any)
+    console.log('✅ Order notification email sent to admin')
+    return true
+  } catch (error) {
+    console.error('❌ Failed to send order email:', error)
+    
+    // Fallback: Open mailto link
+    const subject = `New Order Received - ${orderData.orderId}`
+    const body = generateEmailBody(orderData)
+    const mailtoLink = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    
+    try {
+      window.open(mailtoLink, '_blank')
+    } catch (mailtoError) {
+      console.error('Failed to open email client:', mailtoError)
+    }
+    
+    return false
+  }
+}
+
+// Generate email body text
+const generateEmailBody = (orderData: OrderEmailData): string => {
+  return `
 🛒 NEW ORDER RECEIVED - ${orderData.orderId}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -88,18 +157,6 @@ Please process this order and contact the customer to confirm delivery details.
 
 This is an automated notification from Grahini Mart.
   `.trim()
-
-  // Open default email client with pre-filled content
-  const mailtoLink = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-  
-  // Try to open email client
-  try {
-    window.open(mailtoLink, '_blank')
-    return true
-  } catch (error) {
-    console.error('Failed to open email client:', error)
-    return false
-  }
 }
 
 // Alternative: Copy email content to clipboard
