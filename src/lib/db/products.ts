@@ -45,8 +45,11 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
   try {
     const productRef = doc(db, PRODUCTS_COLLECTION, id)
     
+    // Remove fields that shouldn't be updated
+    const { id: _, createdAt, ...updateFields } = updates as any
+    
     const updateData = {
-      ...updates,
+      ...updateFields,
       updatedAt: serverTimestamp(),
     }
 

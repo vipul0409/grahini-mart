@@ -136,8 +136,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
     // Calculate total stock
     const totalStock = variants.reduce((sum, v) => sum + v.stock, 0)
 
-    const productData: Product = {
-      id: product?.id || `prod-${Date.now()}`,
+    const productData: Omit<Product, 'id'> = {
       name: formData.name,
       slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
       description: formData.description,

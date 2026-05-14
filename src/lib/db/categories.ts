@@ -42,8 +42,11 @@ export const updateCategory = async (id: string, updates: Partial<Category>): Pr
   try {
     const categoryRef = doc(db, CATEGORIES_COLLECTION, id)
     
+    // Remove fields that shouldn't be updated
+    const { id: _, createdAt, ...updateFields } = updates as any
+    
     const updateData = {
-      ...updates,
+      ...updateFields,
       updatedAt: serverTimestamp(),
     }
 
