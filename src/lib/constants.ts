@@ -134,7 +134,7 @@ export const WHY_CHOOSE_US = [
   {
     icon: '🚚',
     title: 'Fast Delivery',
-    description: 'Delivered within 2-3 days',
+    description: 'Delivered within 24 Hours',
   },
   {
     icon: '💰',
