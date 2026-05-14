@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, X } from 'lucide-react'
 import { WEIGHT_OPTIONS, SORT_OPTIONS } from '@/lib/constants'
@@ -20,6 +21,9 @@ export default function ProductFilters({
   isMobile = false,
   onClose,
 }: ProductFiltersProps) {
+  const searchParams = useSearchParams()
+  const categoryFromUrl = searchParams.get('category')
+  
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedWeights, setSelectedWeights] = useState<string[]>([])
@@ -45,6 +49,24 @@ export default function ProductFilters({
     loadCategories()
   }, [])
 
+  // Auto-select category from URL parameter
+  useEffect(() => {
+    if (categoryFromUrl && categories.length > 0) {
+      // Find the category that matches the URL parameter
+      const matchingCategory = categories.find(cat => cat.slug === categoryFromUrl)
+      if (matchingCategory && !selectedCategories.includes(matchingCategory.slug)) {
+        setSelectedCategories([matchingCategory.slug])
+        // Trigger filter change
+        onFilterChange({
+          categories: [matchingCategory.slug],
+          weights: selectedWeights,
+          priceRange,
+          sortBy,
+        })
+      }
+    }
+  }, [categoryFromUrl, categories])
+
   const toggleSection = (section: string) => {
     setExpandedSections((prev) =>
       prev.includes(section)
@@ -54,11 +76,11 @@ export default function ProductFilters({
   }
 
   const handleCategoryToggle = (categorySlug: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categorySlug)
-        ? prev.filter((slug) => slug !== categorySlug)
-        : [...prev, categorySlug]
-    )
+    const newCategories = selectedCategories.includes(categorySlug)
+      ? selectedCategories.filter((slug) => slug !== categorySlug)
+      : [...selectedCategories, categorySlug]
+    
+    setSelectedCategories(newCategories)
   }
 
   const handleWeightToggle = (weight: string) => {

@@ -12,6 +12,12 @@ import Input from '@/components/ui/Input'
 const ADMIN_USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin'
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
 
+// Debug: Log credentials (remove in production)
+if (typeof window !== 'undefined') {
+  console.log('Admin Username:', ADMIN_USERNAME)
+  console.log('Admin Password:', ADMIN_PASSWORD ? '***' + ADMIN_PASSWORD.slice(-4) : 'NOT SET')
+}
+
 export default function AdminLoginPage() {
   const router = useRouter()
   const [username, setUsername] = useState('')

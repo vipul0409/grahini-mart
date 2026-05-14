@@ -7,6 +7,7 @@ import {
   doc, 
   getDocs, 
   query,
+  where,
   orderBy,
   serverTimestamp
 } from 'firebase/firestore'
@@ -20,30 +21,42 @@ const CATEGORIES_COLLECTION = 'categories'
  */
 export const addCategory = async (category: Omit<Category, 'id'>): Promise<string> => {
   try {
-    const categoryData = {
-      ...category,
+    // Remove createdAt and updatedAt if they exist (we'll use serverTimestamp)
+    const { createdAt, updatedAt, ...categoryData } = category as any
+    
+    const dataToSave = {
+      ...categoryData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
 
-    const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), categoryData)
+    const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), dataToSave)
     console.log('✅ Category added with ID:', docRef.id)
     return docRef.id
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error adding category:', error)
-    throw new Error('Failed to add category')
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    if (error?.code === 'permission-denied') {
+      throw new Error('Permission denied. Please update Firestore security rules.')
+    } else {
+      throw new Error(`Failed to add category: ${error?.message || 'Unknown error'}`)
+    }
   }
 }
 
 /**
  * Update an existing category
+ * Also updates all products that belong to this category if the slug changes
  */
-export const updateCategory = async (id: string, updates: Partial<Category>): Promise<void> => {
+export const updateCategory = async (id: string, updates: Partial<Category>, oldSlug?: string): Promise<void> => {
   try {
+    console.log('📝 Attempting to update category:', id)
     const categoryRef = doc(db, CATEGORIES_COLLECTION, id)
     
     // Remove fields that shouldn't be updated
-    const { id: _, createdAt, ...updateFields } = updates as any
+    const { id: _, createdAt, updatedAt, ...updateFields } = updates as any
     
     const updateData = {
       ...updateFields,
@@ -52,9 +65,84 @@ export const updateCategory = async (id: string, updates: Partial<Category>): Pr
 
     await updateDoc(categoryRef, updateData)
     console.log('✅ Category updated:', id)
-  } catch (error) {
+
+    // If slug changed, update all products with the old slug
+    if (oldSlug && updates.slug && oldSlug !== updates.slug) {
+      console.log(`🔄 Updating products from category "${oldSlug}" to "${updates.slug}"`)
+      await updateProductsCategory(oldSlug, updates.slug)
+    }
+  } catch (error: any) {
     console.error('❌ Error updating category:', error)
-    throw new Error('Failed to update category')
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    if (error?.code === 'permission-denied') {
+      throw new Error('Permission denied. Please update Firestore security rules.')
+    } else if (error?.code === 'not-found') {
+      throw new Error('Category not found in database.')
+    } else {
+      throw new Error(`Failed to update category: ${error?.message || 'Unknown error'}`)
+    }
+  }
+}
+
+/**
+ * Update all products that belong to a category when category slug changes
+ */
+const updateProductsCategory = async (oldSlug: string, newSlug: string): Promise<void> => {
+  try {
+    const productsRef = collection(db, 'products')
+    const q = query(productsRef, where('category', '==', oldSlug))
+    const querySnapshot = await getDocs(q)
+
+    const updatePromises: Promise<void>[] = []
+    
+    querySnapshot.forEach((docSnapshot) => {
+      const productRef = doc(db, 'products', docSnapshot.id)
+      updatePromises.push(
+        updateDoc(productRef, {
+          category: newSlug,
+          updatedAt: serverTimestamp(),
+        })
+      )
+    })
+
+    await Promise.all(updatePromises)
+    console.log(`✅ Updated ${updatePromises.length} products to new category: ${newSlug}`)
+  } catch (error) {
+    console.error('❌ Error updating products category:', error)
+    throw new Error('Failed to update products category')
+  }
+}
+
+/**
+ * Check if a category name or slug already exists
+ */
+export const checkCategoryExists = async (name: string, slug: string, excludeId?: string): Promise<{ nameExists: boolean; slugExists: boolean }> => {
+  try {
+    const categoriesRef = collection(db, CATEGORIES_COLLECTION)
+    const querySnapshot = await getDocs(categoriesRef)
+
+    let nameExists = false
+    let slugExists = false
+
+    querySnapshot.forEach((doc) => {
+      // Skip the current category if we're editing
+      if (excludeId && doc.id === excludeId) return
+
+      const data = doc.data()
+      if (data.name.toLowerCase() === name.toLowerCase()) {
+        nameExists = true
+      }
+      if (data.slug.toLowerCase() === slug.toLowerCase()) {
+        slugExists = true
+      }
+    })
+
+    return { nameExists, slugExists }
+  } catch (error) {
+    console.error('❌ Error checking category existence:', error)
+    return { nameExists: false, slugExists: false }
   }
 }
 

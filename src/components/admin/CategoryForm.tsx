@@ -44,7 +44,7 @@ export default function CategoryForm({ category, onClose }: CategoryFormProps) {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validation
@@ -53,11 +53,20 @@ export default function CategoryForm({ category, onClose }: CategoryFormProps) {
       return
     }
 
-    // Check for duplicate slug
-    const duplicateSlug = categories.find(
-      (c) => c.slug === formData.slug && c.id !== category?.id
+    // Check for duplicate name or slug
+    const { checkCategoryExists } = await import('@/lib/db/categories')
+    const { nameExists, slugExists } = await checkCategoryExists(
+      formData.name,
+      formData.slug,
+      category?.id
     )
-    if (duplicateSlug) {
+
+    if (nameExists) {
+      toast.error('A category with this name already exists')
+      return
+    }
+
+    if (slugExists) {
       toast.error('A category with this slug already exists')
       return
     }
@@ -74,15 +83,19 @@ export default function CategoryForm({ category, onClose }: CategoryFormProps) {
       updatedAt: new Date(),
     }
 
-    if (category) {
-      updateCategory(category.id, categoryData)
-      toast.success('Category updated successfully!')
-    } else {
-      addCategory(categoryData)
-      toast.success('Category added successfully!')
+    try {
+      if (category) {
+        // Pass the old slug so products can be updated
+        await updateCategory(category.id, categoryData, category.slug)
+        toast.success('Category updated successfully! Products also updated.')
+      } else {
+        await addCategory(categoryData)
+        toast.success('Category added successfully!')
+      }
+      onClose()
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save category')
     }
-
-    onClose()
   }
 
   return (

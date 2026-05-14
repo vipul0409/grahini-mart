@@ -114,8 +114,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    console.log('🔍 Form submitted, product:', product?.id)
+    console.log('🔍 Form data:', formData)
 
     // Validation
     if (!formData.name || !formData.description) {
@@ -133,38 +136,52 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       return
     }
 
-    // Calculate total stock
-    const totalStock = variants.reduce((sum, v) => sum + v.stock, 0)
+    try {
+      // Calculate total stock
+      const totalStock = variants.reduce((sum, v) => sum + v.stock, 0)
 
-    const productData: Omit<Product, 'id'> = {
-      name: formData.name,
-      slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
-      description: formData.description,
-      shortDescription: formData.shortDescription,
-      category: formData.category as any,
-      images: formData.images,
-      variants,
-      features: [], // Empty features array
-      tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
-      rating: product?.rating || 4.5,
-      reviewCount: product?.reviewCount || 0,
-      isFeatured: formData.isFeatured,
-      isNew: formData.isNew,
-      isBestSeller: formData.isBestSeller,
-      stock: totalStock,
-      createdAt: product?.createdAt || new Date(),
-      updatedAt: new Date(),
+      // For now, just use images as-is (base64 or URLs)
+      // No Firebase Storage upload needed
+      const finalImages = formData.images
+
+      const productData: Omit<Product, 'id'> = {
+        name: formData.name,
+        slug: formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-'),
+        description: formData.description,
+        shortDescription: formData.shortDescription,
+        category: formData.category as any,
+        images: finalImages,
+        variants,
+        features: [], // Empty features array
+        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        rating: product?.rating || 4.5,
+        reviewCount: product?.reviewCount || 0,
+        isFeatured: formData.isFeatured,
+        isNew: formData.isNew,
+        isBestSeller: formData.isBestSeller,
+        stock: totalStock,
+        createdAt: product?.createdAt || new Date(),
+        updatedAt: new Date(),
+      }
+
+      console.log('🔍 Product data to save:', productData)
+
+      if (product) {
+        console.log('🔍 Updating product:', product.id)
+        await updateProduct(product.id, productData)
+        toast.success('Product updated successfully!')
+      } else {
+        console.log('🔍 Adding new product')
+        await addProduct(productData)
+        toast.success('Product added successfully!')
+      }
+
+      onClose()
+    } catch (error: any) {
+      console.error('❌ Error saving product:', error)
+      console.error('❌ Error details:', error.message, error.code)
+      toast.error(error.message || 'Failed to save product')
     }
-
-    if (product) {
-      updateProduct(product.id, productData)
-      toast.success('Product updated successfully!')
-    } else {
-      addProduct(productData)
-      toast.success('Product added successfully!')
-    }
-
-    onClose()
   }
 
   return (

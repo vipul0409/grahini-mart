@@ -11,8 +11,8 @@ import {
 } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useUIStore } from '@/store/uiStore'
-import { SITE_NAME, WHATSAPP_NUMBER } from '@/lib/constants'
-import { getWhatsAppLink } from '@/lib/utils'
+import { SITE_NAME } from '@/lib/constants'
+import ContactMenu from '@/components/ui/ContactMenu'
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -20,11 +20,6 @@ export default function Header() {
   const { toggleCart, toggleMobileMenu } = useUIStore()
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-
-  const handleWhatsAppClick = () => {
-    const message = 'Hi! I want to place an order.'
-    window.open(getWhatsAppLink(WHATSAPP_NUMBER, message), '_blank')
-  }
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
@@ -36,14 +31,7 @@ export default function Header() {
               🎉 Free delivery on orders above ₹500
             </p>
             <p className="md:hidden">Free delivery above ₹500</p>
-            <button
-              onClick={handleWhatsAppClick}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <Phone className="w-4 h-4" />
-              <span className="hidden sm:inline">Order on WhatsApp</span>
-              <span className="sm:hidden">WhatsApp</span>
-            </button>
+            <ContactMenu />
           </div>
         </div>
       </div>

@@ -23,18 +23,28 @@ const PRODUCTS_COLLECTION = 'products'
  */
 export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> => {
   try {
-    const productData = {
-      ...product,
+    // Remove createdAt and updatedAt if they exist (we'll use serverTimestamp)
+    const { createdAt, updatedAt, ...productData } = product as any
+    
+    const dataToSave = {
+      ...productData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }
 
-    const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), productData)
+    const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), dataToSave)
     console.log('✅ Product added with ID:', docRef.id)
     return docRef.id
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error adding product:', error)
-    throw new Error('Failed to add product')
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    if (error?.code === 'permission-denied') {
+      throw new Error('Permission denied. Please update Firestore security rules.')
+    } else {
+      throw new Error(`Failed to add product: ${error?.message || 'Unknown error'}`)
+    }
   }
 }
 
@@ -43,10 +53,19 @@ export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> 
  */
 export const updateProduct = async (id: string, updates: Partial<Product>): Promise<void> => {
   try {
+    console.log('📝 Attempting to update product:', id)
+    
+    // First check if product exists
     const productRef = doc(db, PRODUCTS_COLLECTION, id)
+    const productSnap = await getDoc(productRef)
+    
+    if (!productSnap.exists()) {
+      console.error('❌ Product not found in Firestore:', id)
+      throw new Error(`Product with ID "${id}" does not exist in database. Please refresh the page and try again.`)
+    }
     
     // Remove fields that shouldn't be updated
-    const { id: _, createdAt, ...updateFields } = updates as any
+    const { id: _, createdAt, updatedAt, ...updateFields } = updates as any
     
     const updateData = {
       ...updateFields,
@@ -55,9 +74,18 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
 
     await updateDoc(productRef, updateData)
     console.log('✅ Product updated:', id)
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error updating product:', error)
-    throw new Error('Failed to update product')
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    if (error?.code === 'permission-denied') {
+      throw new Error('Permission denied. Please update Firestore security rules.')
+    } else if (error?.code === 'not-found') {
+      throw new Error('Product not found in database. Please refresh the page.')
+    } else {
+      throw error
+    }
   }
 }
 

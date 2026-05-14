@@ -22,7 +22,13 @@ import { Product } from '@/types'
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const { products: adminProducts, deleteProduct, loadProducts, loadCategories } = useAdminStore()
+  const { 
+    products: adminProducts, 
+    categories: adminCategories,
+    deleteProduct, 
+    loadProducts, 
+    loadCategories 
+  } = useAdminStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -57,6 +63,10 @@ export default function AdminDashboard() {
   const handleEdit = (product: Product) => {
     setEditingProduct(product)
     setShowAddModal(true)
+  }
+
+  const handleCategoryClick = (categorySlug: string) => {
+    setFilterCategory(categorySlug)
   }
 
   const filteredProducts = adminProducts.filter((product) => {
@@ -114,80 +124,69 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <motion.div
+        {/* Stats - Dynamic Category Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6 mb-8">
+          {/* Total Products Card */}
+          <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-lg shadow p-6"
+            onClick={() => handleCategoryClick('all')}
+            className={`bg-white rounded-lg shadow p-4 sm:p-6 text-left transition-all hover:shadow-lg ${
+              filterCategory === 'all' ? 'ring-2 ring-primary-500' : ''
+            }`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{adminProducts.length}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Products</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{adminProducts.length}</p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-primary-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Package className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
             </div>
-          </motion.div>
+          </motion.button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Pulses</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {adminProducts.filter(p => p.category === 'pulses').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </motion.div>
+          {/* Dynamic Category Cards */}
+          {adminCategories
+            .filter(cat => cat.isActive)
+            .sort((a, b) => a.order - b.order)
+            .slice(0, 7) // Show max 7 categories (8 total with "Total Products")
+            .map((category, index) => {
+              const categoryCount = adminProducts.filter(p => p.category === category.slug).length
+              const colors = [
+                { bg: 'bg-green-100', text: 'text-green-600' },
+                { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+                { bg: 'bg-red-100', text: 'text-red-600' },
+                { bg: 'bg-blue-100', text: 'text-blue-600' },
+                { bg: 'bg-purple-100', text: 'text-purple-600' },
+                { bg: 'bg-pink-100', text: 'text-pink-600' },
+                { bg: 'bg-indigo-100', text: 'text-indigo-600' },
+              ]
+              const color = colors[index % colors.length]
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Dry Fruits</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {adminProducts.filter(p => p.category === 'dry-fruits').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-lg shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Masala</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {adminProducts.filter(p => p.category === 'masala').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-red-600" />
-              </div>
-            </div>
-          </motion.div>
+              return (
+                <motion.button
+                  key={category.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: (index + 1) * 0.1 }}
+                  onClick={() => handleCategoryClick(category.slug)}
+                  className={`bg-white rounded-lg shadow p-4 sm:p-6 text-left transition-all hover:shadow-lg ${
+                    filterCategory === category.slug ? 'ring-2 ring-primary-500' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">{category.name}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{categoryCount}</p>
+                    </div>
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${color.bg} rounded-lg flex items-center justify-center flex-shrink-0 ml-2`}>
+                      <span className="text-xl sm:text-2xl">{category.icon}</span>
+                    </div>
+                  </div>
+                </motion.button>
+              )
+            })}
         </div>
 
         {/* Actions Bar */}
@@ -213,9 +212,14 @@ export default function AdminDashboard() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="all">All Categories</option>
-                <option value="pulses">Pulses</option>
-                <option value="dry-fruits">Dry Fruits</option>
-                <option value="masala">Masala</option>
+                {adminCategories
+                  .filter(cat => cat.isActive)
+                  .sort((a, b) => a.order - b.order)
+                  .map(category => (
+                    <option key={category.id} value={category.slug}>
+                      {category.icon} {category.name}
+                    </option>
+                  ))}
               </select>
 
               <Button
