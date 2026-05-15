@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Lock, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -52,8 +53,13 @@ export default function AdminLoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-              <Lock className="w-8 h-8 text-primary-600" />
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <Image
+                src="/images/grahini-mart-logo.png"
+                alt="Grahini Mart"
+                fill
+                className="object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
             <p className="text-gray-600 mt-2">Grahini Mart Admin Panel</p>

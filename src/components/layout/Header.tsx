@@ -13,6 +13,7 @@ import { useCartStore } from '@/store/cartStore'
 import { useUIStore } from '@/store/uiStore'
 import { SITE_NAME } from '@/lib/constants'
 import ContactMenu from '@/components/ui/ContactMenu'
+import Logo from '@/components/ui/Logo'
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -48,15 +49,7 @@ export default function Header() {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="text-3xl">🛒</div>
-            <div className="hidden sm:block">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
-                {SITE_NAME}
-              </h1>
-              <p className="text-xs text-gray-600">थोक दाम में किराना</p>
-            </div>
-          </Link>
+          <Logo size="md" showText={true} />
 
           {/* Search Bar (Desktop) */}
           <div className="hidden lg:flex flex-1 max-w-2xl mx-8">

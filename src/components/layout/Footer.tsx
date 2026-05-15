@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Instagram, Mail, Phone, MapPin } from 'lucide-react'
 import { SITE_NAME, WHATSAPP_NUMBER, INSTAGRAM_HANDLE, FACEBOOK_PAGE, EMAIL, ADDRESS } from '@/lib/constants'
 
@@ -12,15 +13,21 @@ export default function Footer() {
           {/* About */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="text-3xl">🛒</div>
+              <div className="relative w-12 h-12">
+                <Image
+                  src="/images/grahini-mart-logo.png"
+                  alt={SITE_NAME}
+                  fill
+                  className="object-contain"
+                />
+              </div>
               <h3 className="text-xl font-bold">{SITE_NAME}</h3>
             </div>
             <p className="text-brown-200 mb-2 font-semibold">
-              थोक दाम में किराना, अब आपके दरवाजे पर
+              Premium Grocery, Wholesale Rates Mein
             </p>
             <p className="text-brown-200 mb-4">
-              Premium quality pulses (Taza Daalen), spices (Khushboo Bhare Masale), 
-              dry fruits, and daily essentials at wholesale rates.
+              Quality bhi ❤️ aur bachat bhi 💰 - Fresh products at wholesale rates
             </p>
             <div className="flex gap-3">
               <a

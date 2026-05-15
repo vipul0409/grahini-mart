@@ -127,23 +127,43 @@ export const TESTIMONIALS = [
 
 export const WHY_CHOOSE_US = [
   {
-    icon: '✓',
-    title: '100% Pure & Natural',
-    description: 'No artificial colors or preservatives',
-  },
-  {
-    icon: '🚚',
-    title: 'Fast Delivery',
-    description: 'Delivered within 24 Hours',
+    icon: '❤️',
+    title: 'Premium Quality',
+    description: 'Fresh & handpicked products with trusted quality',
   },
   {
     icon: '💰',
-    title: 'Best Prices',
-    description: 'Direct from source, best value',
+    title: 'Wholesale Rates',
+    description: 'Quality bhi aur bachat bhi - best prices guaranteed',
   },
   {
-    icon: '🔒',
-    title: 'Secure Payments',
-    description: 'Safe and encrypted transactions',
+    icon: '🚚',
+    title: 'Free Delivery',
+    description: 'Free delivery within 24hrs in Gwalior',
+  },
+  {
+    icon: '📦',
+    title: 'Flexible Quantity',
+    description: 'Zarurat ke hisaab se quantity available',
   },
 ]
+
+export const ABOUT_US = {
+  title: 'Grahini Mart',
+  subtitle: 'Premium Grocery, Wholesale Rates Mein',
+  description: `Grahini Mart sirf ek grocery store nahi, har ghar ki smart shopping partner hai.
+
+Yahan milti hai premium quality daal, masale, dry fruits aur daily essentials – woh bhi wholesale rates mein, bina quality compromise kiye.
+
+Humara goal simple hai:
+"Har grahini ko mile quality bhi ❤️ aur bachat bhi 💰"
+
+✔️ Fresh & handpicked products
+✔️ Pure masale aur trusted quality
+✔️ Zarurat ke hisaab se quantity available
+✔️ Free delivery within 24hrs 🚚
+✔️ Direct WhatsApp ordering for easy shopping
+
+Ghar ki rasoi ka bharosa, ab online ✨`,
+  tagline: 'Grahini Mart – Premium Grocery, Wholesale Rates Mein',
+}
