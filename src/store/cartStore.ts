@@ -56,10 +56,10 @@ export const useCartStore = create<CartStore>()(
           (sum, item) => sum + item.variant.price * item.quantity,
           0
         )
-        const deliveryCharge = getDeliveryCharge(subtotal)
-        const total = subtotal - get().discount + deliveryCharge
+        // Don't add delivery charge to cart total - only show on checkout
+        const total = subtotal - get().discount
 
-        set({ items: newItems, subtotal, deliveryCharge, total })
+        set({ items: newItems, subtotal, deliveryCharge: 0, total })
       },
 
       removeItem: (productId, variantId) => {
@@ -71,10 +71,10 @@ export const useCartStore = create<CartStore>()(
           (sum, item) => sum + item.variant.price * item.quantity,
           0
         )
-        const deliveryCharge = getDeliveryCharge(subtotal)
-        const total = subtotal - get().discount + deliveryCharge
+        // Don't add delivery charge to cart total - only show on checkout
+        const total = subtotal - get().discount
 
-        set({ items, subtotal, deliveryCharge, total })
+        set({ items, subtotal, deliveryCharge: 0, total })
       },
 
       updateQuantity: (productId, variantId, quantity) => {
@@ -93,10 +93,10 @@ export const useCartStore = create<CartStore>()(
           (sum, item) => sum + item.variant.price * item.quantity,
           0
         )
-        const deliveryCharge = getDeliveryCharge(subtotal)
-        const total = subtotal - get().discount + deliveryCharge
+        // Don't add delivery charge to cart total - only show on checkout
+        const total = subtotal - get().discount
 
-        set({ items, subtotal, deliveryCharge, total })
+        set({ items, subtotal, deliveryCharge: 0, total })
       },
 
       clearCart: () => {
@@ -112,18 +112,18 @@ export const useCartStore = create<CartStore>()(
 
       applyCoupon: (code, discount) => {
         const subtotal = get().subtotal
-        const deliveryCharge = getDeliveryCharge(subtotal)
-        const total = subtotal - discount + deliveryCharge
+        // Don't add delivery charge to cart total - only show on checkout
+        const total = subtotal - discount
 
-        set({ couponCode: code, discount, deliveryCharge, total })
+        set({ couponCode: code, discount, deliveryCharge: 0, total })
       },
 
       removeCoupon: () => {
         const subtotal = get().subtotal
-        const deliveryCharge = getDeliveryCharge(subtotal)
-        const total = subtotal + deliveryCharge
+        // Don't add delivery charge to cart total - only show on checkout
+        const total = subtotal
 
-        set({ couponCode: undefined, discount: 0, deliveryCharge, total })
+        set({ couponCode: undefined, discount: 0, deliveryCharge: 0, total })
       },
     }),
     {

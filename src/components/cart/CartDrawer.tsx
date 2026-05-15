@@ -159,16 +159,15 @@ export default function CartDrawer() {
                       <span>-{formatPrice(discount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery</span>
-                    <span>
-                      {deliveryCharge === 0 ? 'FREE' : formatPrice(deliveryCharge)}
-                    </span>
-                  </div>
                   <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-200">
                     <span>Total</span>
                     <span>{formatPrice(total)}</span>
                   </div>
+                  {subtotal < 100 && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Add ₹{100 - subtotal} more for free delivery!
+                    </p>
+                  )}
                 </div>
 
                 {/* Actions */}

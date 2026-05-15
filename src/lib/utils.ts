@@ -80,9 +80,10 @@ export function validatePhone(phone: string): boolean {
 }
 
 export function getDeliveryCharge(subtotal: number): number {
-  if (subtotal >= 500) return 0
-  if (subtotal >= 300) return 30
-  return 50
+  // Free delivery for orders above ₹100
+  if (subtotal >= 100) return 0
+  // ₹40 delivery charge for orders below ₹100
+  return 40
 }
 
 export function getEstimatedDelivery(): Date {
