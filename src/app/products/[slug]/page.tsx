@@ -298,37 +298,80 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Variant Selection */}
-            {product.variants.length > 1 && (
+            {product.variants.length > 1 ? (
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-900">
+                <label className="block text-lg font-semibold text-gray-900">
                   Select Size/Weight
                 </label>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {product.variants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setSelectedVariant(variant)}
-                      className={`relative p-4 rounded-lg border-2 transition-all ${
-                        selectedVariant.id === variant.id
-                          ? 'border-primary-500 bg-primary-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <p className="font-semibold text-gray-900">
-                          {variant.weight}{variant.unit}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {formatPrice(variant.price)}
-                        </p>
-                      </div>
-                      {selectedVariant.id === variant.id && (
-                        <div className="absolute top-2 right-2">
-                          <Check className="w-4 h-4 text-primary-600" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {product.variants.map((variant) => {
+                    const variantDiscount = calculateDiscount(variant.mrp, variant.price)
+                    return (
+                      <button
+                        key={variant.id}
+                        onClick={() => setSelectedVariant(variant)}
+                        className={`relative p-4 rounded-xl border-2 transition-all ${
+                          selectedVariant.id === variant.id
+                            ? 'border-primary-500 bg-primary-50 shadow-lg scale-105'
+                            : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-md'
+                        }`}
+                      >
+                        <div className="text-center space-y-2">
+                          {/* Weight */}
+                          <p className="text-xl font-bold text-gray-900">
+                            {variant.weight}{variant.unit}
+                          </p>
+                          
+                          {/* Price */}
+                          <div>
+                            <p className="text-lg font-bold text-primary-600">
+                              {formatPrice(variant.price)}
+                            </p>
+                            {variant.mrp > variant.price && (
+                              <p className="text-xs text-gray-500 line-through">
+                                {formatPrice(variant.mrp)}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Discount Badge */}
+                          {variantDiscount > 0 && (
+                            <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded">
+                              {variantDiscount}% OFF
+                            </span>
+                          )}
                         </div>
-                      )}
-                    </button>
-                  ))}
+                        
+                        {/* Selected Checkmark */}
+                        {selectedVariant.id === variant.id && (
+                          <div className="absolute top-2 right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="text-sm text-gray-500 italic">
+                  💡 Select your preferred weight to see the price
+                </p>
+              </div>
+            ) : (
+              /* Single Variant - Show as info */
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Available Size</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {selectedVariant.weight}{selectedVariant.unit}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Price</p>
+                    <p className="text-2xl font-bold text-primary-600">
+                      {formatPrice(selectedVariant.price)}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
