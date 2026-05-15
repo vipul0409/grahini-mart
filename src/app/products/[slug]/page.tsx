@@ -51,19 +51,43 @@ export default function ProductDetailPage() {
       
       if (products.length > 0) {
         console.log('📋 Available slugs:', products.map(p => p.slug))
+        console.log('📋 Available product names:', products.map(p => p.name))
       }
       
-      const foundProduct = products.find(p => p.slug === slug)
+      // Try to find by slug first
+      let foundProduct = products.find(p => p.slug === slug)
+      
+      // If not found by slug, try by ID (in case slug in URL is actually ID)
+      if (!foundProduct) {
+        console.log('⚠️ Not found by slug, trying by ID...')
+        foundProduct = products.find(p => p.id === slug)
+      }
+      
+      // If still not found, try by name (case-insensitive)
+      if (!foundProduct) {
+        console.log('⚠️ Not found by ID, trying by name...')
+        const decodedSlug = decodeURIComponent(slug).toLowerCase()
+        foundProduct = products.find(p => 
+          p.name.toLowerCase() === decodedSlug ||
+          p.slug.toLowerCase() === decodedSlug
+        )
+      }
       
       if (foundProduct) {
         console.log('✅ Product found:', foundProduct.name)
+        console.log('📝 Product slug:', foundProduct.slug)
+        console.log('🆔 Product ID:', foundProduct.id)
         setProduct(foundProduct)
         // Set default variant
         const defaultVar = foundProduct.variants.find(v => v.isDefault) || foundProduct.variants[0]
         setSelectedVariant(defaultVar)
       } else {
         console.error('❌ Product not found with slug:', slug)
-        console.log('Available products:', products.map(p => ({ name: p.name, slug: p.slug })))
+        console.log('Available products:', products.map(p => ({ 
+          id: p.id,
+          name: p.name, 
+          slug: p.slug 
+        })))
         toast.error('Product not found. Redirecting to products page...')
         setTimeout(() => {
           router.push('/products')
