@@ -44,22 +44,37 @@ export default function ProductDetailPage() {
   const loadProduct = async () => {
     try {
       setLoading(true)
+      console.log('🔍 Loading product with slug:', slug)
+      
       const products = await getAllProducts()
+      console.log('📦 Total products loaded:', products.length)
+      
+      if (products.length > 0) {
+        console.log('📋 Available slugs:', products.map(p => p.slug))
+      }
+      
       const foundProduct = products.find(p => p.slug === slug)
       
       if (foundProduct) {
+        console.log('✅ Product found:', foundProduct.name)
         setProduct(foundProduct)
         // Set default variant
         const defaultVar = foundProduct.variants.find(v => v.isDefault) || foundProduct.variants[0]
         setSelectedVariant(defaultVar)
       } else {
-        toast.error('Product not found')
-        router.push('/products')
+        console.error('❌ Product not found with slug:', slug)
+        console.log('Available products:', products.map(p => ({ name: p.name, slug: p.slug })))
+        toast.error('Product not found. Redirecting to products page...')
+        setTimeout(() => {
+          router.push('/products')
+        }, 2000)
       }
     } catch (error) {
-      console.error('Error loading product:', error)
-      toast.error('Failed to load product')
-      router.push('/products')
+      console.error('❌ Error loading product:', error)
+      toast.error('Failed to load product. Redirecting...')
+      setTimeout(() => {
+        router.push('/products')
+      }, 2000)
     } finally {
       setLoading(false)
     }

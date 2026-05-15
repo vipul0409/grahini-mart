@@ -53,14 +53,7 @@ export default function AdminLoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="relative w-20 h-20 mx-auto mb-4">
-              <Image
-                src="/images/grahini-mart-logo.png"
-                alt="Grahini Mart"
-                fill
-                className="object-contain"
-              />
-            </div>
+            <div className="text-6xl mb-4">🛒</div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
             <p className="text-gray-600 mt-2">Grahini Mart Admin Panel</p>
           </div>

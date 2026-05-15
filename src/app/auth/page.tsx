@@ -235,14 +235,7 @@ export default function AuthPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            <Image
-              src="/images/grahini-mart-logo.png"
-              alt="Grahini Mart"
-              fill
-              className="object-contain"
-            />
-          </div>
+          <div className="text-6xl mb-4">🛒</div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
             Grahini Mart
           </h1>

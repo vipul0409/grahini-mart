@@ -10,24 +10,17 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', showText = true, className = '' }: LogoProps) {
   const sizes = {
-    sm: { width: 32, height: 32, text: 'text-lg' },
-    md: { width: 48, height: 48, text: 'text-2xl' },
-    lg: { width: 64, height: 64, text: 'text-3xl' },
+    sm: { width: 32, height: 32, text: 'text-lg', emoji: 'text-2xl' },
+    md: { width: 48, height: 48, text: 'text-2xl', emoji: 'text-3xl' },
+    lg: { width: 64, height: 64, text: 'text-3xl', emoji: 'text-4xl' },
   }
 
-  const { width, height, text } = sizes[size]
+  const { width, height, text, emoji } = sizes[size]
 
   return (
     <Link href="/" className={`flex items-center gap-2 ${className}`}>
-      <div className="relative" style={{ width, height }}>
-        <Image
-          src="/images/grahini-mart-logo.png"
-          alt={SITE_NAME}
-          fill
-          className="object-contain"
-          priority
-        />
-      </div>
+      {/* Fallback to emoji if image not found */}
+      <div className={emoji}>🛒</div>
       {showText && (
         <div className="hidden sm:block">
           <h1 className={`${text} font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent`}>
